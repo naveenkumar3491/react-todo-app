@@ -1,11 +1,11 @@
-var React = require('react');
+import React from 'react';
 
-var TodosCount = function (props) {
+const TodosCount = ({ todosCount }) => {
     return (
         <div className="well well-small">
-            <h4>Total Todos: {props.todosCount}</h4>
+            <h4>Total Todos: {todosCount}</h4>
         </div>
     );
 }
 
-module.exports = TodosCount;
+export default TodosCount;

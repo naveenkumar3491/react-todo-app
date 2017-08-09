@@ -1,46 +1,105 @@
-var React = require('react');
-var TodoForm = require('./TodoForm');
-var TodoList = require('./TodoList');
-var TodosCount = require('./TodosCount');
+import React from 'react';
+import TodoForm from './TodoForm';
+import TodoList from './TodoList';
+import TodosCount from './TodosCount';
+import FilterLinks from './FilterLinks';
+import constants from '../constants';
 
-class Todo extends React.Component{
-    constructor(props){
+const { ALL, ACTIVE, COMPLETED } = constants;
+
+class Todo extends React.Component {
+    constructor(props) {
         super(props);
         this.handleNewTodoItem = this.handleNewTodoItem.bind(this);
         this.handleDeleteBtnClick = this.handleDeleteBtnClick.bind(this);
+        this.handleCheckboxClick = this.handleCheckboxClick.bind(this);
+        this.handleFilterChange = this.handleFilterChange.bind(this);
+        this.handleSearchTerm = this.handleSearchTerm.bind(this);
         this.state = {
+            searchTerm: '',
+            currentFilter: ALL,
             todos: []
         }
     }
-    handleNewTodoItem(todo){
-        this.setState(function(prevState){
-            var todos = prevState.todos.concat(todo);
-            return{
-                todos: todos
+    handleNewTodoItem() {
+        this.setState(({ searchTerm, todos }) => {
+            const todoItem = {
+                todo: searchTerm,
+                id: Date.now().toString(),
+                completed: false
+            }
+            // todos = todos.concat(todoItem);
+            todos = [...todos, todoItem];
+            return {
+                todos: todos,
+                searchTerm: ''
             }
         })
     }
-    handleDeleteBtnClick(evt){
-        var index = +(evt.target.value);
-        this.setState(function(prevState){
-            var todos = prevState.todos;
-            //todos.splice(index, 1);  //prefer not to mutate the state object
-            todos = todos.slice(0, index).concat(todos.slice(index + 1));
-            return{
+    handleDeleteBtnClick(evt) {
+        const id = evt.target.value;
+        this.setState(({ todos }) => {
+            todos = todos.filter(({ id: todoId }) => todoId !== id);
+            return {
                 todos: todos
             }
         });
     }
-    render(){
-        var todos = this.state.todos;
-        return(
+    handleCheckboxClick(evt) {
+        const id = evt.target.value;
+        this.setState(({ todos }) => {
+            const index = todos.findIndex(({ id: todoId }) => todoId === id);
+            const { todo, completed } = todos[index];
+            todos = [
+                ...todos.slice(0, index),
+                {
+                    todo: todo,
+                    id: id,
+                    completed: !completed
+                },
+                ...todos.slice(index + 1)
+            ];
+            return {
+                todos: todos
+            }
+        });
+    }
+    handleFilterChange(evt, currentFilter) {
+        evt.preventDefault();
+        this.setState(() => ({currentFilter: currentFilter}));
+    }
+    filterTodos() {
+        const { todos, currentFilter, searchTerm } = this.state;
+        const filteredTodos = todos.filter(({ todo, completed }) => {
+            if (todo.indexOf(searchTerm) === -1 || currentFilter === COMPLETED && !completed || currentFilter === ACTIVE && completed) {
+                return false;
+            }
+            return true;
+        });
+        return filteredTodos;
+    }
+    handleSearchTerm(searchTerm) {
+        this.setState(() => ({searchTerm: searchTerm}));
+    }
+    render() {
+        const todos = this.filterTodos();
+        const {
+            state: { searchTerm, currentFilter },
+            handleSearchTerm,
+            handleNewTodoItem,
+            handleFilterChange,
+            handleDeleteBtnClick,
+            handleCheckboxClick
+        } = this;
+        return (
             <div>
-                <TodoForm onNewTodoItem = {this.handleNewTodoItem}/>
-                <TodoList todos={todos} onDelteBtnClick={this.handleDeleteBtnClick}/>
-                <TodosCount todosCount = {todos.length}/>
+                <TodoForm todoText={searchTerm} searchonField={handleSearchTerm} onNewTodoItem={handleNewTodoItem} />
+                <FilterLinks currentFilter={currentFilter} onFilterChange={handleFilterChange} />
+                <TodoList todos={todos} onDelteBtnClick={handleDeleteBtnClick} onCheckboxClick={handleCheckboxClick} />
+                <TodosCount todosCount={todos.length} />
             </div>
         );
     }
 }
 
-module.exports = Todo;
+export default Todo;

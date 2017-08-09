@@ -1,17 +1,19 @@
-var React = require('react');
-var TodoItem = require('./TodoItem');
+import React from 'react';
+import TodoItem from './TodoItem';
 
-var TodoList = function (props) {
-    var todoList = [];
-    var todos = props.todos;
-    for (var i = 0; i < todos.length; ++i) {
-        todoList.push(<TodoItem todo={todos[i]} index={i} onDeleteBtnClick={props.onDelteBtnClick}/>)
-    }
+const TodoList = ({ todos, onDelteBtnClick, onCheckboxClick }) => {
+    const todoList = todos.map(todo => (
+        <TodoItem
+            todoItem={todo}
+            key={todo.id}
+            onDeleteBtnClick={onDelteBtnClick}
+            onCheckboxClick={onCheckboxClick} />
+    ))
     return (
-        <ul class="list-group">
+        <ul className="list-group">
             {todoList}
         </ul>
     )
 }
 
-module.exports = TodoList;
+export default TodoList;

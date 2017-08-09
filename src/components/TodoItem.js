@@ -1,17 +1,20 @@
-var React = require('react');
+import React from 'react';
 
-var TodoItem = function (props) {
+const TodoItem = ({ todoItem: { todo, id, completed }, onCheckboxClick, onDeleteBtnClick}) => {
     return (
         <li className="list-group-item">
-            <h3>{props.todo}
-            <button onClick={props.onDeleteBtnClick} 
-                    value={props.index}
+            <h3>
+            <input type="checkbox" className="pull-left" checked={completed} value={id} onChange={onCheckboxClick}/>
+            {todo}
+                <button onClick={onDeleteBtnClick}
+                    value={id}
                     className="btn btn-default btn-danger pull-right">
-                Delete
+                    Delete
             </button>
             </h3>
         </li>
     );
 }
 
-module.exports = TodoItem;
+
+export default TodoItem;
